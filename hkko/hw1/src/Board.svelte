@@ -1,9 +1,9 @@
-<script>
-    // import Select from 'svelte-select';
-    
+<script> 
+    import { fade } from 'svelte/transition';
+
     let board = [["", "", ""], ["", "", ""], ["", "", ""]];
     let turn = 'X';
-    let checked = [[false, false, false], [false, false, false], [false, false, false],]
+    let checked = [[false, false, false], [false, false, false], [false, false, false],];
     let win = null;
     let boards = [];
 
@@ -32,11 +32,11 @@
     }
 
     function restart() {
+        win = null;
         board = [["", "", ""], ["", "", ""], ["", "", ""]];
         turn = 'X'
-        win = null;
         boards = [];
-        checked = [[false, false, false], [false, false, false], [false, false, false],]
+        checked = [[false, false, false], [false, false, false], [false, false, false],];
     }
 
     const lines = [
@@ -61,6 +61,17 @@
             }
         }
     }
+
+    function twirl(node, params) {
+        return {
+            duration: params.duration,
+            css: t => {
+                const color = `background: rgb(0, 256, ${t*256});`;
+                return color + `transform: scale(${(t-.5)*100}) rotate(${t*120}deg);`
+            }
+        }
+    }
+
 </script>
 
 <style>
@@ -87,7 +98,13 @@
         {#each board as row, rowIndex}
             <tr>
                 {#each row as col, colIndex}
-                    <td on:click={() => onclick(rowIndex, colIndex)}>{col}</td>
+                    <td on:click={() => onclick(rowIndex, colIndex)}>
+                    {#if checked[rowIndex][colIndex]}
+                        <div transition:fade>
+                            {col}
+                        </div>
+                    {/if}
+                    </td>
                 {/each}
             </tr>
         {/each}
@@ -95,7 +112,7 @@
 </table>
 
 {#if win != null}
-    <h1>{win} win!</h1>
+    <div transition:twirl="{{duration: 1000}}">{win} win!</div>
 {:else}
     <h3>Now: {turn}'s turn... </h3>
 {/if}
