@@ -35,8 +35,8 @@
 * Svelte를 이용하여 React tutorial 의 Tic-Tac-Toe를 구현해본다. 
 * 링크: https://ko.reactjs.org/tutorial/tutorial.html#completing-the-game
 * 조건
-** 기본적으로 React tutorial 에서 구현한 기능들을 전부 구현해아 햡니다. 즉, React tutorial 에서 예시로 구현된 코드와 똑같이 작동해야 합니다.
-** 새로 돌을 놓거나 이전 상태로 전환할 때 svelte의 내장 transition이나 animation을 사용해야 합니다.
+  * 기본적으로 React tutorial 에서 구현한 기능들을 전부 구현해아 햡니다. 즉, React tutorial 에서 예시로 구현된 코드와 똑같이 작동해야 합니다.
+  * 새로 돌을 놓거나 이전 상태로 전환할 때 svelte의 내장 transition이나 animation을 사용해야 합니다.
 
 ### Week 2: Using Svelte + D3 with Python Backend (7/30)
 
