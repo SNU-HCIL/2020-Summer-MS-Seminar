@@ -5,5 +5,13 @@ export enum State {
 }
 
 export const gameLog : Writable<any[]> = writable([])      // stores the history of the gameplay
+gameLog.set([
+    {
+        board: [[0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0]],
+        before_turn: State.O
+    }
+]); 
 
 
