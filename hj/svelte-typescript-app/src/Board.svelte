@@ -47,28 +47,37 @@
 
         let lastLog : any;
         gameLog.subscribe(v => { lastLog = v } );
-        console.log("LASTLOG", lastLog)
+
 
 
         let newState : State = currentState == State.O ? State.X : State.O;
         if(lastLog.length - 1 === currentLogStatus){
+            console.log("NEW")
             let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[lastLog.length - 1].board));
             newBoard[coordinate[0]][coordinate[1]] = currentState;
             lastLog.push({
                     board : newBoard,
                     before_turn : newState,
             });
-            logStatus.update(n => n + 1)
         }
         else {
+            console.log("AFTER revert", currentLogStatus)
+            console.log(lastLog);
             let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[currentLogStatus].board));
             newBoard[coordinate[0]][coordinate[1]] = currentState;
-            lastLog[currentLogStatus++] = {
+            lastLog = lastLog.slice(0, currentLogStatus+1);
+            lastLog.push({
                 board : newBoard,
                 before_turn : newState,
-            }
+            });
         }
+
+        logStatus.update(n => n + 1)
+
+
         
+        console.log("LASTLOG", lastLog)
+
         gameLog.set(
             lastLog
         );
