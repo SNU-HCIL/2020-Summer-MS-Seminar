@@ -6,17 +6,22 @@
     let cells : any;
     let currentLogStatus : number;
     let currentState : State;
-    gameLog.subscribe(v => { 
-        logStatus.subscribe(n => {
-            currentLogStatus = n;
-            cells = v[n].board;
-            currentState = v[n].before_turn;
-        })
-     });
-
-
     let winner : State = State.E;
     let finished : boolean = false;
+    let lastLog : any;
+    gameLog.subscribe(v => { lastLog = v } );
+    logStatus.subscribe(n => {
+        currentLogStatus = n;
+        cells = lastLog[n].board;
+        winner = checkWinner();
+        finished = (winner !== State.E) ? true : false;
+    });
+
+
+
+
+    cells = lastLog[currentLogStatus].board;
+
 
     function checkIdentity(a : any, b : any, c : any) : boolean {
         if (a === b && b === c) return true;
@@ -45,11 +50,6 @@
 
         // log capture
 
-        let lastLog : any;
-        gameLog.subscribe(v => { lastLog = v } );
-
-
-
         let newState : State = currentState == State.O ? State.X : State.O;
         if(lastLog.length - 1 === currentLogStatus){
             console.log("NEW")
@@ -61,7 +61,7 @@
             });
         }
         else {
-            console.log("AFTER revert", currentLogStatus)
+            console.log("AFTER revert")
             console.log(lastLog);
             let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[currentLogStatus].board));
             newBoard[coordinate[0]][coordinate[1]] = currentState;
@@ -72,22 +72,27 @@
             });
         }
 
+        console.log("bfore", currentLogStatus)
+        console.log("befotre", lastLog)
+        console.log(lastLog[currentLogStatus + 1])
+
+        gameLog.update(
+            v => lastLog
+        );
+
+        console.log("after", lastLog)
+
         logStatus.update(n => n + 1)
 
+        console.log(currentLogStatus)
 
         
         console.log("LASTLOG", lastLog)
 
-        gameLog.set(
-            lastLog
-        );
-
-
-
         cells = lastLog[currentLogStatus].board;
-
+        currentState = lastLog[currentLogStatus].before_turn;
         winner = checkWinner();
-        if (winner !== State.E) finished = true;
+        finished = (winner !== State.E) ? true : false;
         
     }
 
