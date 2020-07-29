@@ -1,10 +1,13 @@
 <script lang="ts">
 
+	import Board from './Board.svelte'
+
 
 </script>
 
 <main>
 	<h1>Tic Tac Toe</h1>
+	<Board/>
 </main>
 
 <style type="text/scss"> 
