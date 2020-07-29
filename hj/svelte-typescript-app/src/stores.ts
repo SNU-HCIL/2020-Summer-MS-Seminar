@@ -14,4 +14,6 @@ gameLog.set([
     }
 ]); 
 
+export const logStatus : Writable<number> = writable(0);
+
 

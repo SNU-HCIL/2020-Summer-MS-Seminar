@@ -1,16 +1,20 @@
 <script lang="ts">
-    import { gameLog, State } from "./stores"
+    import { gameLog, State, logStatus } from "./stores"
     import { fade } from "svelte/transition"
 
 
+    let cells : any;
+    let currentLogStatus : number;
+    let currentState : State;
+    gameLog.subscribe(v => { 
+        logStatus.subscribe(n => {
+            currentLogStatus = n;
+            cells = v[n].board;
+            currentState = v[n].before_turn;
+        })
+     });
 
-    let cells : State[][] = [      // stores the current status of game board cells
-        [State.E, State.E, State.E],
-        [State.E, State.E, State.E],
-        [State.E, State.E, State.E]
-    ];
 
-    let currentState : State = State.O;
     let winner : State = State.E;
     let finished : boolean = false;
 
@@ -43,24 +47,35 @@
 
         let lastLog : any;
         gameLog.subscribe(v => { lastLog = v } );
-        console.log(lastLog)
+        console.log("LASTLOG", lastLog)
 
-        let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[lastLog.length - 1].board));
-        lastLog.push({
+
+        let newState : State = currentState == State.O ? State.X : State.O;
+        if(lastLog.length - 1 === currentLogStatus){
+            let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[lastLog.length - 1].board));
+            newBoard[coordinate[0]][coordinate[1]] = currentState;
+            lastLog.push({
+                    board : newBoard,
+                    before_turn : newState,
+            });
+            logStatus.update(n => n + 1)
+        }
+        else {
+            let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[currentLogStatus].board));
+            newBoard[coordinate[0]][coordinate[1]] = currentState;
+            lastLog[currentLogStatus++] = {
                 board : newBoard,
-                before_turn :  currentState 
-         });
-        console.log(newBoard)
-        newBoard[coordinate[0]][coordinate[1]] = currentState;
+                before_turn : newState,
+            }
+        }
+        
         gameLog.set(
             lastLog
         );
 
 
-        //cells[coordinate[0]][coordinate[1]] = currentState;
-        cells = newBoard;
 
-        currentState = currentState == State.O ? State.X : State.O;
+        cells = lastLog[currentLogStatus].board;
 
         winner = checkWinner();
         if (winner !== State.E) finished = true;
@@ -83,11 +98,7 @@
                     <button id="button_{i}{j}" on:click={clickCell} disabled={finished || cells[i][j] !== State.E}>
                         {#if cell != State.E}
                             <span transition:fade>
-                                {#if cell == State.O}
-                                    O
-                                {:else}
-                                    X
-                                {/if}
+                                {#if cell == State.O} O {:else} X {/if}
                             </span>
                         {/if}
                     </button>

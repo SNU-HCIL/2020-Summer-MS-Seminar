@@ -1,25 +1,22 @@
 <script lang="ts">
-    import { gameLog, State } from "./stores"
+    import { gameLog, State, logStatus } from "./stores"
 
-    let test_gameLog = [
-        [[0, 0, 0],
-         [0, 1, 0],
-         [0, 0, 0]],
-        [[0, 0, 0],
-         [0, 1, 0],
-         [0, 2, 0]],
-        [[0, 0, 0],
-         [0, 1, 0],
-         [0, 2, 1]],
-    ];
+    let logs : any;
+    gameLog.subscribe(v => { logs = v });
+
+    function revertLog() {
+        let logNum : number = parseInt(this.id[4]);
+        logStatus.set(logNum);
+    }
+    
 
 </script>
 
 <div id="log-view">
     <ul>
-        {#each test_gameLog as log, i}
+        {#each logs as log, i}
             <li>
-                <button>
+                <button on:click={revertLog} id="log_{i}">
                     {#if i === 0}
                         Go to game start
                     {:else}
