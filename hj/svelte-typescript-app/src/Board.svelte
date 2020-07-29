@@ -1,6 +1,6 @@
 <script lang="ts">
     import { gameLog, State, logStatus } from "./stores"
-    import { fade } from "svelte/transition"
+    import { fade, blur } from "svelte/transition"
 
 
     let cells : any;
@@ -13,6 +13,7 @@
     logStatus.subscribe(n => {
         currentLogStatus = n;
         cells = lastLog[n].board;
+        currentState = lastLog[n].before_turn;
         winner = checkWinner();
         finished = (winner !== State.E) ? true : false;
     });
@@ -97,19 +98,19 @@
     }
 
 </script>
-<div>
-    <h2>
-        {#if winner === State.E}
-            Next player : {#if currentState === State.O} O {:else} X {/if}
-        {:else}
-            Winner is {#if winner === State.O} O {:else} X {/if} 
-        {/if}
-    </h2>
+<div id="board-view">
+    {#if winner === State.E}
+        <h2>Next player : {#if currentState === State.O} O {:else} X {/if}</h2>
+    {:else}
+        <h2>Winner is {#if winner === State.O} O {:else} X {/if}</h2>
+    {/if}
     <div id="game-board">
         {#each cells as cell_row, i}
             <div class="cell-row">
                 {#each cell_row as cell, j}
-                    <button id="button_{i}{j}" on:click={clickCell} disabled={finished || cells[i][j] !== State.E}>
+                    <button id="button_{i}{j}" on:click={clickCell} 
+                            disabled={finished || cells[i][j] !== State.E}
+                            style={finished || cells[i][j] !== State.E ? "cursor:default": "cursor:pointer"}>
                         {#if cell != State.E}
                             <span transition:fade>
                                 {#if cell == State.O} O {:else} X {/if}
@@ -124,8 +125,8 @@
 
 <style type="text/scss">
     button {
-        width: 50px;
-        height: 50px;
+        width: 59px;
+        height: 59px;
         margin: 3px;
         padding: auto;
         border: 0px;
@@ -133,7 +134,7 @@
         box-shadow: 0 5px 5px #8ec0fa inset, 0 -5px 5px #8ec0fa inset;
         background: #499af7;
         text-align: center;
-        color: rgba(0, 0, 0, 1)
+        color: rgba(0, 0, 0, 1);
     }
 
     .cell-row {
@@ -144,11 +145,19 @@
         display: inline-block;
     }
 
+    #board-view {
+        border-right: 1px #499af7 solid;
+        height: 350px;
+    }
+
     h2 {
 		color: #03254c;
 		font-size: 2em;
-        font-weight: 300;
+        font-weight: 200;
         margin: 20px;
+        margin-top:8px;
+        margin-bottom:20px;
+        width: 200px;
     }
 
 
