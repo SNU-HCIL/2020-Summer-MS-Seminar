@@ -1,7 +1,9 @@
 import { writable, Writable } from 'svelte/store'
 
+export enum State {
+    E = 0, O, X      // empty, O, X
+}
 
-
-export const gamePlay : Writable<any[]> = writable([])      // stores the history of the gameplay
+export const gameLog : Writable<any[]> = writable([])      // stores the history of the gameplay
 
 

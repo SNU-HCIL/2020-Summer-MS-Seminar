@@ -1,13 +1,17 @@
 <script lang="ts">
 
 	import Board from './Board.svelte'
+	import Log from './Log.svelte'
 
 
 </script>
 
 <main>
 	<h1>Tic Tac Toe</h1>
-	<Board/>
+	<div id="main-view">
+		<Board/>
+		<Log/>
+	</div>
 </main>
 
 <style type="text/scss"> 
@@ -29,5 +33,9 @@
 		main {
 			max-width: none;
 		}
+	}
+
+	#main-view {
+		display: inline-flex;
 	}
 </style>
