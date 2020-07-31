@@ -66,7 +66,7 @@
     * 전적을 x전 y승 z무 w패 형식으로 표시한다.
     * Pie chart를 통해서 전적 정보를 시각화 해준다.
     * DB의 전적이 업데이트 되면 전적 화면더 이에 맞추어서 업데이트가 되어야 한다. 
-    ![예시](./sample.png)
+    * 예시 ![예시](./sample.png)
   * playAI
     * playAI 는 현재 Tic-tac-toe 플레이 상황을 input으로 받아서, 다음으로 AI가 수를 놓을 위치를 반환한다.
     * input: 'O', 'X', None 으로 구성된 길이가 9인 list. HW1의 square 변수와 거의 동일하다. 
