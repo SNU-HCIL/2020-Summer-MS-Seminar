@@ -10,12 +10,14 @@ gameLog.set([
         board: [[0, 0, 0],
                 [0, 0, 0],
                 [0, 0, 0]],
-        before_turn: State.O
+        before_turn: State.X
     }
 ]); 
 
 export const logStatus : Writable<number> = writable(0);
 
 export const loginSuccessStore : Writable<boolean> = writable(false);
+
+export const idStore : Writable<string> = writable("");
 
 

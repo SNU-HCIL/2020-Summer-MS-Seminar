@@ -18,9 +18,6 @@
         finished = (winner !== State.E) ? true : false;
     });
 
-
-
-
     cells = lastLog[currentLogStatus].board;
 
 
@@ -73,28 +70,21 @@
             });
         }
 
-        console.log("bfore", currentLogStatus)
-        console.log("befotre", lastLog)
-        console.log(lastLog[currentLogStatus + 1])
-
         gameLog.update(
             v => lastLog
         );
 
-        console.log("after", lastLog)
-
         logStatus.update(n => n + 1)
-
-        console.log(currentLogStatus)
-
-        
-        console.log("LASTLOG", lastLog)
 
         cells = lastLog[currentLogStatus].board;
         currentState = lastLog[currentLogStatus].before_turn;
         winner = checkWinner();
         finished = (winner !== State.E) ? true : false;
         
+    }
+
+    function resetBoard() {
+        logStatus.set(0);
     }
 
 </script>
@@ -120,6 +110,9 @@
                 {/each}
             </div>
         {/each}
+    </div>
+    <div>
+        <button class="reset-button" on:click={resetBoard}>Reset</button>
     </div>
 </div>
 
@@ -158,6 +151,19 @@
         margin-top:8px;
         margin-bottom:20px;
         width: 200px;
+    }
+
+    .reset-button {
+        margin: 20px;
+        width: 188px;
+        height: 31px;
+        padding: auto;
+        border: 0px;
+        border-radius: 5px;
+        background: #8ec0fa;
+        text-align: center;
+        color: rgba(0, 0, 0, 1);
+        cursor: pointer;
     }
 
 

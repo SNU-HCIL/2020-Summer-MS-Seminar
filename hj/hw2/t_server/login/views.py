@@ -23,7 +23,6 @@ def signUp(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         
-
         users = tttUser.objects.filter(userId=body["id"])
         if users.__len__() > 0:
             return HttpResponse("Already existing ID")

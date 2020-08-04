@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { loginSuccessStore } from './stores'
+    import { loginSuccessStore, idStore } from './stores'
     import axios from 'axios'
 
     let domain = "http://localhost:8000/login/";
@@ -54,6 +54,7 @@
             if(response.data.result) {
                 alert("Sign in Succeed. Hello " + signInId);
                 loginSuccessStore.set(true);
+                idStore.set(signInId);
             }
             else {
                 alert("Unregistered ID...");

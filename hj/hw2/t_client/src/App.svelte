@@ -3,18 +3,21 @@
 	import Board from './Board.svelte'
 	import Log from './Log.svelte'
 	import Login from './Login.svelte'
+	import Record from './Record.svelte'
 	import { onMount } from 'svelte'
-	import { loginSuccessStore } from './stores'
+	import { loginSuccessStore, idStore } from './stores'
 
 	let loginSuccess : boolean;
+	let id : string;
 	onMount(() => {
 		loginSuccessStore.subscribe(v => {		// register loginSuceess Variable
 			loginSuccess = v;
 		})
+		idStore.subscribe(v => {  				// register id Variable
+			id = v;
+		})
+		idStore.set("");
 	})
-
-
-	
 
 
 </script>
@@ -24,7 +27,8 @@
 	{#if loginSuccess}     <!-- After Login-->
 	<div id="main-view">
 		<Board/>
-		<Log/>
+		<Record/>
+		<!-- <Log/> -->    <!-- Logging disabled in hw2 -->
 	</div>
 	{:else}				  <!-- After Login-->
 		<Login/>	
