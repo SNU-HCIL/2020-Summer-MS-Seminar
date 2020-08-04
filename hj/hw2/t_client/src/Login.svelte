@@ -2,6 +2,8 @@
     import { loginSuccessStore } from './stores'
     import axios from 'axios'
 
+    let domain = "http://localhost:8000/login/";
+
     let signInId : string;
     let signUpId : string;
 
@@ -10,26 +12,58 @@
                  id == undefined ||
                  id.includes(' ') );
     }
+
+    async function getToken() {
+        await axios.get(domain, { withCredentials: true });
+    }
+
+    function getCookie(name: string): string {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
     
-    async function signIn() {
+    function signIn() {
         if(checkInvalidId(signInId)) {
             alert("Wrong ID!!")
             signInId = "";
         }
         else {
-            const response = await axios.get("http://localhost:8000/login/");
-            alert("Welcome!!");
-            console.log(response);
             loginSuccessStore.set(true);
         }
     }
 
-    function signUp() {
+    async function signUp() {
         if(checkInvalidId(signUpId)) {
             alert("Input valid ID!!");
             signUpId = "";
         }
         else {
+            await getToken();
+            const csrftoken : string = getCookie("csrftoken");
+            const response = await axios.post(domain + "signup/", 
+            {
+                id: signUpId,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    "X-CSRFToken" : csrftoken
+                },
+            });
+            alert(response.data);
+            console.log(response);
+
+
             alert("Registered!! Your ID is " + signUpId);
         }
     }
