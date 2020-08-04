@@ -2,16 +2,34 @@
 
 	import Board from './Board.svelte'
 	import Log from './Log.svelte'
+	import Login from './Login.svelte'
+	import { onMount } from 'svelte'
+	import { loginSuccessStore } from './stores'
+
+	let loginSuccess : boolean;
+	onMount(() => {
+		loginSuccessStore.subscribe(v => {		// register loginSuceess Variable
+			loginSuccess = v;
+		})
+	})
+
+
+	
 
 
 </script>
 
 <main>
 	<h1>Tic Tac Toe</h1>
+	{#if loginSuccess}     <!-- After Login-->
 	<div id="main-view">
 		<Board/>
 		<Log/>
 	</div>
+	{:else}				  <!-- After Login-->
+		<Login/>	
+	{/if}
+
 </main>
 
 <style type="text/scss"> 
