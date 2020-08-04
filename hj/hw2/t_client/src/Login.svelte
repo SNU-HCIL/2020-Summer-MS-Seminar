@@ -32,13 +32,33 @@
         return cookieValue;
     }
     
-    function signIn() {
+    async function signIn() {
         if(checkInvalidId(signInId)) {
             alert("Wrong ID!!")
             signInId = "";
         }
         else {
-            loginSuccessStore.set(true);
+            await getToken();
+            const csrftoken : string = getCookie("csrftoken");
+            const response = await axios.put(domain + "signin/", 
+            {
+                id: signInId,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    "X-CSRFToken" : csrftoken
+                },
+            });
+            // console.log(response)
+            if(response.data.result) {
+                alert("Sign in Succeed. Hello " + signInId);
+                loginSuccessStore.set(true);
+            }
+            else {
+                alert("Unregistered ID...");
+            }
+            signInId = "";
         }
     }
 
@@ -60,11 +80,9 @@
                     "X-CSRFToken" : csrftoken
                 },
             });
-            alert(response.data);
             console.log(response);
-
-
-            alert("Registered!! Your ID is " + signUpId);
+            alert(response.data);
+            signUpId = "";
         }
     }
 
