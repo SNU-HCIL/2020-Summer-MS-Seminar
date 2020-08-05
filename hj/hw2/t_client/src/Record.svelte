@@ -180,8 +180,6 @@
 
 <style>
     #record-view {
-        margin-left: 25px;
-        margin-right: 25px;
         display: block;
     }
 
