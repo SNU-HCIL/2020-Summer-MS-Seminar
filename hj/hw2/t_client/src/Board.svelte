@@ -1,6 +1,33 @@
 <script lang="ts">
-    import { gameLog, State, logStatus } from "./stores"
+    import { gameLog, State, logStatus, idStore } from "./stores"
+    import { winStore, loseStore, drawStore } from "./stores"
     import { fade, blur } from "svelte/transition"
+    import axios from 'axios'
+
+    let id : string;
+
+    idStore.subscribe(v => { id = v; } );
+
+    let domain = "http://localhost:8000/login/";
+
+    async function getToken() {
+        await axios.get(domain, { withCredentials: true });
+    }
+
+    function getCookie(name: string): string {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
 
     let cells : any;
@@ -43,7 +70,7 @@
         return State.E; 
     }
 
-    function clickCell() {
+    async function clickCell() {
         let coorStr : string = this.id.slice(7,9);
         let coordinate : [number, number] = [parseInt(coorStr[0]), parseInt(coorStr[1])];
 
@@ -88,8 +115,31 @@
             isDraw = true;
         }
         
-        
-        
+        if(finished) {
+            let result : string = isDraw ? "draw" : (winner === State.O ? "lose" : "win");
+            await getToken();
+            const csrftoken : string = getCookie("csrftoken");
+            const response = await axios.put(domain + "gameResult/", 
+            {
+                id: id,
+                gameResult: result,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    "X-CSRFToken" : csrftoken
+                },
+            });
+            console.log(response);
+            console.log(result);
+            switch(result){
+                case "win" : winStore.update(v => response.data.win);  break;
+                case "lose": loseStore.update(v => response.data.lose); break;
+                case "draw": drawStore.update(v => response.data.draw); break;
+            }
+            console.log(winStore, loseStore, drawStore)
+
+        }
     }
 
     function resetBoard() {

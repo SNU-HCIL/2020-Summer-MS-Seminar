@@ -2,6 +2,8 @@
     import { onMount } from 'svelte';
     import * as d3 from 'd3';
     import { idStore } from "./stores"
+    import { winStore, loseStore, drawStore } from "./stores"
+    import axios from 'axios'
 
     let x = 100;
     let y = 100;
@@ -12,20 +14,58 @@
     let pies;
     let text;
 
-    let win : number = 0;
-    let lose : number = 0;
-    let draw : number = 0;
+    let win : number;
+    let lose : number;
+    let draw : number;
+
+    interface WDL {
+        win : number,
+        draw : number,
+        lose : number,
+        spare : number,
+    }
+
+    let currentStatus = null;
+
 
     let colors = ["#8ec0fa", "#ff6f69", "#81C784", "#888888"];
 
     let id;
+    
+    let domain = "http://localhost:8000/login/";
+
+    
+
+    async function getStatus(id : string) {
+        const response = await axios.get(domain + 'status/' + id);
+        console.log(response);
+        let spare : number = (response.data.win + response.data.draw + response.data.lose) > 0 ? 0 : 1;
+        winStore.set(response.data.win);
+        drawStore.set(response.data.draw);
+        loseStore.set(response.data.lose);
+        currentStatus = {
+            win : win,
+            lose : lose,
+            draw : draw,
+            spare : spare,
+        };
+    }
+
 
     function updateRecord() {
         let spare : number;
         if((win + lose + draw == 0)) spare = 1;
         else                         spare = 0;
 
-        let data = {win: win, lose: lose, draw: draw, spare: spare};
+        console.log(win, lose, draw, initial);
+        currentStatus = {
+            win : win,
+            lose : lose,
+            draw : draw,
+            spare : spare,
+        };
+
+        let data = currentStatus;
         let statusStr : string = (Math.round((data.win * 100) / (data.lose + data.draw + data.win + data.spare))).toString() + "%";
 
         let pie = d3.pie()
@@ -60,13 +100,34 @@
 
     }
 
-    onMount(() => {
+    let initial : boolean;
+
+    onMount(async () => {
+        initial = true;
+
+        // subscribe
+        idStore.subscribe( v => { id = v; } )
+        winStore.subscribe( v => {
+            win = v;
+            if (!initial) updateRecord();
+        })
+        loseStore.subscribe( v => {
+            lose = v;
+            if (!initial) updateRecord();
+        })
+        drawStore.subscribe( v => {
+            draw = v;
+            if (!initial) updateRecord();
+        })
+
+
+        await getStatus(id);
 
         svg = d3.select("#record-svg")
                 .append('g')
                 .attr("transform", "translate(" + x + "," + y + ")");
 
-        let data = {win: win, lose: lose, draw: draw, spare:1}
+        let data = currentStatus;
 
         let statusStr : string = (Math.round((data.win * 100) / (data.lose + data.draw + data.win + data.spare))).toString() + "%"
         let color = d3.scaleOrdinal()
@@ -96,9 +157,10 @@
         status = data.win.toString() + "W " + data.draw.toString() + "D " + data.lose.toString() + "L";
 
 
-        // subscribe
+        // not initial
+        initial = false;
 
-        idStore.subscribe( v => { id = v; } )
+
 
     });
 
@@ -113,20 +175,6 @@
     <h3>{status}</h3>
     <svg id="record-svg"></svg>
     <h4>signed in as {id}</h4>
-    <!--For test : buttons-->
-    <button on:click={() => {
-        win += 1;
-        updateRecord();
-    }}>W</button>
-    <button on:click={() => {
-        draw += 1;
-        updateRecord();
-    }}>D</button>
-    <button on:click={() => {
-        lose += 1;
-        updateRecord();
-    }}>L</button>
-
 </div>
 
 

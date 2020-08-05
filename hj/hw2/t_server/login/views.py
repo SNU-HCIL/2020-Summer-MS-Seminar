@@ -44,3 +44,46 @@ def signIn(request):
         return JsonResponse({
             'result': True
         })
+        
+def status(request, user_id):
+    if request.method == "GET":
+        try:
+            user = tttUser.objects.get(userId=user_id)
+        except tttUser.DoesNotExist:
+            return JsonResponse({
+                'result': False
+            })
+        
+        return JsonResponse({
+            'result': True,
+            'win': user.win,
+            'draw': user.draw,
+            "lose": user.lose,
+        })
+
+def gameResult(request):
+    if request.method == "PUT":
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        try:
+            user = tttUser.objects.get(userId=body["id"])
+        except tttUser.DoesNotExist:
+            return JsonResponse({
+                'result': False
+            })
+
+        if body["gameResult"] == "win":
+            user.win += 1
+        elif body["gameResult"] == "lose":
+            user.lose += 1
+        else:
+            user.draw += 1
+        
+        user.save();
+        return JsonResponse({
+            'result': True,
+            'win': user.win,
+            'draw': user.draw,
+            'lose': user.lose
+        })
+        
