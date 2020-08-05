@@ -37,6 +37,8 @@
     let finished : boolean = false;
     let lastLog : any;
     let isDraw : boolean = false;
+    let aiThinking : boolean = false;
+
     gameLog.subscribe(v => { lastLog = v } );
     logStatus.subscribe(n => {
         currentLogStatus = n;
@@ -70,6 +72,10 @@
         return State.E; 
     }
 
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     async function clickCell() {
         let coorStr : string = this.id.slice(7,9);
         let coordinate : [number, number] = [parseInt(coorStr[0]), parseInt(coorStr[1])];
@@ -78,7 +84,6 @@
 
         let newState : State = currentState == State.O ? State.X : State.O;
         if(lastLog.length - 1 === currentLogStatus){
-            console.log("NEW")
             let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[lastLog.length - 1].board));
             newBoard[coordinate[0]][coordinate[1]] = currentState;
             lastLog.push({
@@ -87,8 +92,6 @@
             });
         }
         else {
-            console.log("AFTER revert")
-            console.log(lastLog);
             let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[currentLogStatus].board));
             newBoard[coordinate[0]][coordinate[1]] = currentState;
             lastLog = lastLog.slice(0, currentLogStatus+1);
@@ -130,14 +133,89 @@
                     "X-CSRFToken" : csrftoken
                 },
             });
-            console.log(response);
-            console.log(result);
             switch(result){
                 case "win" : winStore.update(v => response.data.win);  break;
                 case "lose": loseStore.update(v => response.data.lose); break;
                 case "draw": drawStore.update(v => response.data.draw); break;
             }
-            console.log(winStore, loseStore, drawStore)
+            return;
+        }
+        else {
+            // AI Turn (needs refactoring...)
+            let board : any[][] = lastLog[lastLog.length - 1].board;
+            let input : string = "";
+            for(let i = 0; i < 3; i++) 
+                for(let j = 0; j < 3; j++) {
+                    if      (board[i][j] == 0) input += "N";
+                    else if (board[i][j] == 1) input += "O";
+                    else                       input += "X";
+                }
+            const response = await axios.get(domain + "aiTurn/" + input + "/");
+            // ai thinking...
+            aiThinking = true;
+            await sleep(2500);
+            aiThinking = false;
+            // ai thinking ends
+            let coordRaw : number = parseInt(response.data);
+            coordinate = [Math.floor(coordRaw / 3), coordRaw % 3];
+            let newState : State = currentState == State.O ? State.X : State.O;
+            if(lastLog.length - 1 === currentLogStatus){
+                let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[lastLog.length - 1].board));
+                newBoard[coordinate[0]][coordinate[1]] = currentState;
+                lastLog.push({
+                        board : newBoard,
+                        before_turn : newState,
+                });
+            }
+            else {
+                let newBoard : any[][] = JSON.parse(JSON.stringify(lastLog[currentLogStatus].board));
+                newBoard[coordinate[0]][coordinate[1]] = currentState;
+                lastLog = lastLog.slice(0, currentLogStatus+1);
+                lastLog.push({
+                    board : newBoard,
+                    before_turn : newState,
+                });
+            }
+
+            gameLog.update(
+                v => lastLog
+            );
+
+            logStatus.update(n => n + 1)
+
+            cells = lastLog[currentLogStatus].board;
+            currentState = lastLog[currentLogStatus].before_turn;
+            winner = checkWinner();
+            finished = (winner !== State.E) ? true : false;
+
+            // draw case
+            if(currentLogStatus == 9 && winner == State.E) {
+                finished = true;
+                isDraw = true;
+            }
+            
+            if(finished) {
+                let result : string = isDraw ? "draw" : (winner === State.O ? "lose" : "win");
+                await getToken();
+                const csrftoken : string = getCookie("csrftoken");
+                const response = await axios.put(domain + "gameResult/", 
+                {
+                    id: id,
+                    gameResult: result,
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        "X-CSRFToken" : csrftoken
+                    },
+                });
+                switch(result){
+                    case "win" : winStore.update(v => response.data.win);  break;
+                    case "lose": loseStore.update(v => response.data.lose); break;
+                    case "draw": drawStore.update(v => response.data.draw); break;
+                }
+                return;
+            }
 
         }
     }
@@ -163,7 +241,7 @@
             <div class="cell-row">
                 {#each cell_row as cell, j}
                     <button id="button_{i}{j}" on:click={clickCell} 
-                            disabled={finished || cells[i][j] !== State.E}
+                            disabled={aiThinking || finished || cells[i][j] !== State.E}
                             style={finished || cells[i][j] !== State.E ? "cursor:default": "cursor:pointer"}>
                         {#if cell != State.E}
                             <span transition:fade>

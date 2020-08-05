@@ -8,4 +8,5 @@ urlpatterns = [
     path('signin/', views.signIn, name="signIn"),
     path('status/<slug:user_id>/', views.status, name="status"),
     path('gameResult/', views.gameResult, name="gameResult"),
+    path('aiTurn/<slug:input>/', views.aiTurn, name="aiTurn")
 ]
