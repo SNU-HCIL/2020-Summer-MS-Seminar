@@ -9,6 +9,7 @@
     let winner : State = State.E;
     let finished : boolean = false;
     let lastLog : any;
+    let isDraw : boolean = false;
     gameLog.subscribe(v => { lastLog = v } );
     logStatus.subscribe(n => {
         currentLogStatus = n;
@@ -80,19 +81,32 @@
         currentState = lastLog[currentLogStatus].before_turn;
         winner = checkWinner();
         finished = (winner !== State.E) ? true : false;
+
+        // draw case
+        if(currentLogStatus == 9 && winner == State.E) {
+            finished = true;
+            isDraw = true;
+        }
+        
+        
         
     }
 
     function resetBoard() {
         logStatus.set(0);
+        winner = State.E;
+        isDraw = false;
+        finished = false;
     }
 
 </script>
 <div id="board-view">
-    {#if winner === State.E}
-        <h2>Next player : {#if currentState === State.O} O {:else} X {/if}</h2>
+    {#if isDraw}
+        <h2>Draw!!</h2>
+    {:else if winner === State.E}
+        <h2>{#if currentState === State.O} AI's turn {:else} Your turn {/if}</h2>
     {:else}
-        <h2>Winner is {#if winner === State.O} O {:else} X {/if}</h2>
+        <h2>{#if winner === State.O} You lose!! {:else} You win!! {/if}</h2>
     {/if}
     <div id="game-board">
         {#each cells as cell_row, i}

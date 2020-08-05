@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import * as d3 from 'd3';
-    import { winStore, loseStore, drawStore } from "./stores"
+    import { idStore } from "./stores"
 
-    let x = 125;
-    let y = 125;
+    let x = 100;
+    let y = 100;
 
     let status : string = "";
 
@@ -17,6 +17,8 @@
     let draw : number = 0;
 
     let colors = ["#8ec0fa", "#ff6f69", "#81C784", "#888888"];
+
+    let id;
 
     function updateRecord() {
         let spare : number;
@@ -38,14 +40,14 @@
             .join(
                 enter => enter.append('path')
                               .attr('d', d3.arc()
-                                    .innerRadius(80)
-                                    .outerRadius(110)
+                                    .innerRadius(75)
+                                    .outerRadius(100)
                                )
                                 .attr('fill', function(d){ return(color(d.data.key)) }),
                 update => update
                                 .attr('d', d3.arc()
-                                    .innerRadius(80)
-                                    .outerRadius(110)
+                                    .innerRadius(75)
+                                    .outerRadius(100)
                                 ),
             );
 
@@ -64,7 +66,7 @@
                 .append('g')
                 .attr("transform", "translate(" + x + "," + y + ")");
 
-        let data = {win: 0, lose: 0, draw: 0, spare:1}
+        let data = {win: win, lose: lose, draw: draw, spare:1}
 
         let statusStr : string = (Math.round((data.win * 100) / (data.lose + data.draw + data.win + data.spare))).toString() + "%"
         let color = d3.scaleOrdinal()
@@ -81,8 +83,8 @@
                   .enter()
                   .append('path')
                   .attr('d', d3.arc()
-                          .innerRadius(80)
-                          .outerRadius(110)
+                          .innerRadius(75)
+                          .outerRadius(100)
                       )
                   .attr('fill', function(d){ return(color(d.data.key)) });
 
@@ -91,24 +93,12 @@
                   .attr("x", -15);
 
         // status
-        status = data.win.toString() + "W " + data.draw.toString() + "D " + data.lose.toString() + "L"
+        status = data.win.toString() + "W " + data.draw.toString() + "D " + data.lose.toString() + "L";
 
 
         // subscribe
-        winStore.subscribe(v => {
-            win = v;
-            updateRecord();
-        });
 
-        drawStore.subscribe(v => {
-            draw = v;
-            updateRecord();
-        });
-
-        loseStore.subscribe(v => {
-            lose = v;
-            updateRecord();
-        });
+        idStore.subscribe( v => { id = v; } )
 
     });
 
@@ -122,15 +112,19 @@
 <div id="record-view">
     <h3>{status}</h3>
     <svg id="record-svg"></svg>
+    <h4>signed in as {id}</h4>
     <!--For test : buttons-->
     <button on:click={() => {
-        winStore.update(v => v + 1);
+        win += 1;
+        updateRecord();
     }}>W</button>
     <button on:click={() => {
-        drawStore.update(v => v + 1);
+        draw += 1;
+        updateRecord();
     }}>D</button>
     <button on:click={() => {
-        loseStore.update(v => v + 1);
+        lose += 1;
+        updateRecord();
     }}>L</button>
 
 </div>
@@ -144,14 +138,25 @@
     }
 
     #record-svg {
-        width: 250px;
-        height: 250px;
+        width: 200px;
+        height: 200px;
 
     }
 
     h3 {
         color: #03254c;
 		font-size: 1.5em;
+        font-weight: 200;
+        margin: 20px;
+        margin-left: 25px;
+        margin-top: 23px;
+        margin-bottom: 15px;
+        width: 200px;
+    }
+
+    h4 {
+        color: #03254c;
+		font-size: 1em;
         font-weight: 200;
         margin: 20px;
         margin-left: 25px;
