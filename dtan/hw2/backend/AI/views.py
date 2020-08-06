@@ -1,14 +1,30 @@
 from django.shortcuts import render
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from http import HTTPStatus
 import random
 
 # Create your views here.
-@login_required
-def index(request, squares):
-    return JsonResponse({
-        'next': playAI(squares)
-    })
+@ensure_csrf_cookie
+def index(request):
+    if not request.user.is_authenticated:
+        return HttpResponse("Not found.", status=HTTPStatus.NOT_FOUND)
+
+    if request.method == 'POST':
+        if request.META['CONTENT_TYPE'].find("application/json") != -1:
+            d = json.loads(request.body)
+        else:
+            d = request.POST
+        try:
+            squares = d['squares']
+            return JsonResponse({
+                'next': playAI(d['squares'])
+            })
+        except KeyError:
+            return HttpResponse('Bad request.', status=HTTPStatus.BAD_REQUEST)
+    else:
+        return HttpResponse('This method is not allowed.', status=HTTPStatus.METHOD_NOT_ALLOWED)
+
 
 def playAI(squares):
     lines = [

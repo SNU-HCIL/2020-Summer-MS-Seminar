@@ -15,8 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from records import views
+from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('ai/', include('AI.urls')),
+    path('records/', csrf_exempt(views.records), name="records"),
+    path('auth/', csrf_exempt(views.auth), name="auth"),
+    path('', views.index, name="index"),
+    path('hello/', views.hello, name="hello"),
 ]

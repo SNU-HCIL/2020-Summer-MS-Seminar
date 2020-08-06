@@ -102,16 +102,5 @@
       {"Next player: " + (state.xIsNext ? "X" : "O")}
       {/if}
     </div>
-    <ol>
-      {#each state.history as log, i (log)}
-        <li in:fade
-          class={i === state.stepNumber ? "current-step" : "other-step"}>
-          <button on:click={() => jumpTo(i)}
-            class={i === state.stepNumber ? "current-step" : "other-step"}>
-            {i ? 'Go to move #' + i : 'Go to game start'}
-          </button>
-        </li>
-      {/each}
-    </ol>
   </div>
 </div>
