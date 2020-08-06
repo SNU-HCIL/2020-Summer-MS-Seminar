@@ -4,9 +4,14 @@
 	import {fade, fly} from'svelte/transition'
 	const gameHistory = BoardManager.gameHistory
 	const gameStatus = BoardManager.gameStatus
+	const url = 'http://127.0.0.1:8000/'
+	
+	$: loggedIn = false
 </script>
 
 <main>
+
+
 	<div class="tic-tac-toe">
 		<div class="board">
 			<Board/>
