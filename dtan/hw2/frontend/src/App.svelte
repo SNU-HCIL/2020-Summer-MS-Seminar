@@ -1,6 +1,7 @@
 <script lang="ts">
   import Game from './Game.svelte';
   import Signin from './Signin.svelte';
+  import { login } from './stores';
   import { writable } from 'svelte/store';
   import { onMount } from 'svelte';
   import axios from 'axios';
@@ -35,8 +36,6 @@
   export function checkLoginStatus() {
     promise = getLoginStatus();
   }
-
-  export const login = writable(false);
 
   async function getLoginStatus() {
     try {
@@ -118,7 +117,7 @@
     </Route>
     <Route path="game/" component="{Game}" />
     <Route path="login/">
-      <Signin bind:userid={id} bind:pw={pw} click={signinClick} error=""/>
+      <Signin bind:userid={id} bind:pw={pw} click={signinClick}/>
     </Route>
     <Route path="info/">
       <p>Internal server error.</p>

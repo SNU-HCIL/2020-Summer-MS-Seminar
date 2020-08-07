@@ -1,6 +1,7 @@
 <script lang="ts">
-  import Board from './Board.svelte'
+  import Board from './Board.svelte';
   import Square from './Square.svelte';
+  import { login } from './stores';
   import { fade } from 'svelte/transition';
   import { onMount } from 'svelte';
   import axios from 'axios';
@@ -72,7 +73,7 @@
     'lose': 0
   };
 
-  onMount(async () => {
+  async function getRecord() {
     try {
       const res = await axios.get(
         'http://127.0.0.1:8000/records',
@@ -87,14 +88,14 @@
       }
     } catch (error) {
       if (error.response) {
-        return;
+        throw new Error(error.response);
       }
       else {
         navigate("info");
         return;
       }
     }
-  });
+  }
 </script>
 
 <style>
@@ -123,6 +124,12 @@
     />
   </div>
   <div class="game-info">
-    <p>{record.total}전 {record.win}승 {record.draw}무 {record.lose}패</p>
+    {#await getRecord}
+      <p>전적을 불러오는 중입니다...</p>
+    {:then data} 
+      <p>{record.total}전 {record.win}승 {record.draw}무 {record.lose}패</p>
+    {:catch error}
+      <p>{error}</p>
+    {/await}
   </div>
 </div>
