@@ -1,6 +1,6 @@
 import random
 
-def playAI(squares) :
+def play(squares) :
     lines = [
         [0, 1, 2],
         [3, 4, 5],

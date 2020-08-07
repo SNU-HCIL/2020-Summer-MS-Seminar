@@ -1,0 +1,27 @@
+{
+	"test": {
+		"win": 1,
+		"draw": 2,
+		"lose": 3
+	},
+	"frank": {
+		"win": 0,
+		"draw": 0,
+		"lose": 0
+	},
+	"tset": {
+		"win": 0,
+		"draw": 0,
+		"lose": 0
+	},
+	"tes": {
+		"win": 0,
+		"draw": 0,
+		"lose": 0
+	},
+	"\u3145\u3137\u3134\u3145": {
+		"win": 0,
+		"draw": 0,
+		"lose": 0
+	}
+}
