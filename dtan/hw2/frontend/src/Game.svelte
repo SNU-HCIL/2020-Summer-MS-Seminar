@@ -1,7 +1,10 @@
 <script lang="ts">
   import Board from './Board.svelte'
-  import type Square from './Square.svelte';
+  import Square from './Square.svelte';
   import { fade } from 'svelte/transition';
+  import { onMount } from 'svelte';
+  import axios from 'axios';
+  import { navigate } from 'svelte-routing';
 
   let state = {
     history: [
@@ -61,13 +64,40 @@
     state.xIsNext = (step % 2) === 0;
     //state = state;
   }
+
+  let record = {
+    'total': 0,
+    'win': 0,
+    'draw': 0,
+    'lose': 0
+  };
+
+  onMount(async () => {
+    try {
+      const res = await axios.get(
+        'http://127.0.0.1:8000/records',
+        {
+          withCredentials: true
+        }
+      );
+      if (res.status === 200) {
+        record = res.data;
+        console.log(res.data);
+        return;
+      }
+    } catch (error) {
+      if (error.response) {
+        return;
+      }
+      else {
+        navigate("info");
+        return;
+      }
+    }
+  });
 </script>
 
 <style>
-  ol {
-    padding-left: 30px;
-  }
-
   .game {
     display: flex;
     flex-direction: row;
@@ -76,25 +106,10 @@
   .game-info {
     margin-left: 20px;
   }
-
-  .current-step {
-    color: #d6225e;
-    border-color: #d3849e;
-  }
-
-  .other-step {
-    color: #000;
-  }
 </style>
 
 <div class="game">
-  <div class="game-board">
-    <Board
-      squares={state.history[state.stepNumber].squares}
-      on:message={handleClick}
-    />
-  </div>
-  <div class="game-info">
+  <div>
     <div>
       {#if winner}
       {"Winner: " + winner}
@@ -102,5 +117,12 @@
       {"Next player: " + (state.xIsNext ? "X" : "O")}
       {/if}
     </div>
+    <Board
+      squares={state.history[state.stepNumber].squares}
+      on:message={handleClick}
+    />
+  </div>
+  <div class="game-info">
+    <p>{record.total}전 {record.win}승 {record.draw}무 {record.lose}패</p>
   </div>
 </div>

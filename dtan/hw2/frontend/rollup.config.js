@@ -39,6 +39,7 @@ export default {
 	},
 	plugins: [
 		svelte({
+			hydratable: true,
 			// enable run-time checks when not in production
 			dev: !production,
 			// we'll extract any component CSS out into
@@ -59,6 +60,8 @@ export default {
 			dedupe: ['svelte']
 		}),
 		commonjs(),
+		typescript({ sourceMap: !production }),
+		typescript({ sourceMap: !production }),
 		typescript({ sourceMap: !production }),
 
 		// In dev mode, call `npm run start` once

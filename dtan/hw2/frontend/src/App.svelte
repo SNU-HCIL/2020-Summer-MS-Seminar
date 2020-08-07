@@ -4,14 +4,15 @@
   import { writable } from 'svelte/store';
   import { onMount } from 'svelte';
   import axios from 'axios';
-  import Cookies from 'js-cookie';
-  import { Router, Link, Route } from 'svelte-routing';
+  //import Cookies from 'js-cookie';
+  import { Router, Route, navigate } from 'svelte-routing';
   // https://www.npmjs.com/package/svelte-routing
 
   let promise = getLoginStatus();
   let id = '';
   let pw = '';
 
+  /*
   function getCookie(name: string, documentCookie: string): string {
     let cookieValue = null;
     if (documentCookie && documentCookie !== '') {
@@ -27,7 +28,9 @@
     }
     return cookieValue;
   }
+  */
 
+  export let url = "";
 
   export function checkLoginStatus() {
     promise = getLoginStatus();
@@ -36,22 +39,38 @@
   export const login = writable(false);
 
   async function getLoginStatus() {
-    const res = await axios.get(
-      'http://127.0.0.1:8000/',
-      {
-        withCredentials: true
+    try {
+      const res = await axios.get(
+        'http://127.0.0.1:8000/',
+        {
+          withCredentials: true
+        }
+      );
+      if (res.status === 200) {
+        login.set(true);
+        navigate("game");
+        return;
       }
-    );
-    if (res.status === 200) {
-      login.set(true);
-      
-      return;
-    }
-    else {
-      login.set(false);
-      throw new Error("");
+      else {
+        login.set(false);
+        navigate("login");
+        return;
+      }
+    } catch (error) {
+      if (error.response) {
+        login.set(false);
+        navigate("login");
+        return;
+      }
+      else {
+        login.set(false);
+        navigate("info");
+        return;
+      }
     }
   }
+
+  onMount(getLoginStatus);
 
   function signinClick() {
     axios.get(
@@ -60,12 +79,14 @@
         withCredentials: true
       }
     ).then((response) => {
+      /*
       console.log(response);
       const csrftoken = getCookie('csrftoken', response.headers["Cookie"]);
       console.log(csrftoken);
       const headers = {
         'X-CSRFToken': csrftoken
       };
+      */
       axios.post(
         'http://127.0.0.1:8000/auth/',
         {
@@ -74,7 +95,7 @@
         },
         {
           withCredentials: true,
-          headers
+          //headers
         }
       ).then(function (res) {
         checkLoginStatus();
@@ -90,28 +111,27 @@
   <title>dtan's Tic Tac Toe</title>
 </svelte:head>
 
-<main>
-  {#await promise}
-    <p>Connecting to server...</p>
-  {:then}
-    <Game />
-  {:catch error}
-    <Signin bind:userid={id} bind:pw={pw} click={signinClick} error={error}/>
-  {/await}
-</main>
+<Router url="{url}">
+  <div>
+    <Route path="/">
+      <p>Connecting to server...</p>
+    </Route>
+    <Route path="game/" component="{Game}" />
+    <Route path="login/">
+      <Signin bind:userid={id} bind:pw={pw} click={signinClick} error=""/>
+    </Route>
+    <Route path="info/">
+      <p>Internal server error.</p>
+    </Route>
+  </div>
+</Router>
 
 <style>
-  main {
+  div {
     text-align: center;
     padding: 1em;
     max-width: 240px;
     font: 14px "Century Gothic", Futura, sans-serif;
     margin: 20px;
-  }
-
-  @media (min-width: 640px) {
-    main {
-      max-width: none;
-    }
   }
 </style>
