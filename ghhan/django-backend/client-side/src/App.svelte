@@ -1,57 +1,74 @@
 <script lang="ts">
+	import {onMount} from 'svelte'
+	import {fade, fly} from'svelte/transition'
+	
+	import Authentication from './Authentication.svelte'
+	import {sessionStatus} from './SessionStatusManager'
+	
 	import Board from './Board.svelte'
 	import {BoardManager} from './BoardManager'
-	import {fade, fly} from'svelte/transition'
+	import {GameStatManager} from './GameStatManager'
+	
 	const gameHistory = BoardManager.gameHistory
 	const gameStatus = BoardManager.gameStatus
-	const url = 'http://127.0.0.1:8000/'
+	const gameStats = GameStatManager.gameStats
+	const aggrGameResult = GameStatManager.aggrGameResult
+
 	
-	$: loggedIn = false
+	let loggedIn = false
+
+	onMount( async() => {
+		sessionStatus
+	})
+
 </script>
 
 <main>
-
-
-	<div class="tic-tac-toe">
-		<div class="board">
-			<Board/>
+	{#if !$sessionStatus.loggedIn()}
+		<div class="authentication">
+			<Authentication/>
 		</div>
-	</div>
-	<div class="game-log">
-		<div class="status">
-			{#if $gameStatus == "Win"}
-				<b>Winner: {$gameHistory.currentState().turnOfTheFirst ? 'O': 'X'}</b>
-			{:else if $gameStatus == "Draw"}
-				<b>Draw</b>
-			{:else}
-				Next Player: {$gameHistory.currentState().turnOfTheFirst ? 'O': 'X'}
-			{/if}
-
+	{:else}
+		<div class="tic-tac-toe">
+			<div class="board">
+				<Board/>
+			</div>
 		</div>
-		<div class="actions">
-			{#if $gameHistory.canUndo()}
-				<button on:click={gameHistory.undo}>Undo</button>
-			{:else}
-				<button disabled>Undo</button>
-			{/if}
-			{#if $gameHistory.canRedo()}
-				<button on:click={gameHistory.redo}>Redo</button>
-			{:else}
-				<button disabled>Redo</button>
-			{/if}
+		<div class="game-log">
+			<div class="status">
+				{#if $gameStatus == "Win"}
+					<b>Winner: {$gameHistory.currentState().turnOfTheFirst ? 'O': 'X'}</b>
+				{:else if $gameStatus == "Draw"}
+					<b>Draw</b>
+				{:else}
+					Next Player: {$gameHistory.currentState().turnOfTheFirst ? 'O': 'X'}
+				{/if}
+			</div>
+			<div class="actions">
+				{#if $gameHistory.canUndo()}
+					<button on:click={gameHistory.undo}>Undo</button>
+				{:else}
+					<button disabled>Undo</button>
+				{/if}
+				{#if $gameHistory.canRedo()}
+					<button on:click={gameHistory.redo}>Redo</button>
+				{:else}
+					<button disabled>Redo</button>
+				{/if}
+			</div>
+			<div class="history">
+				<ol>
+					{#each $gameHistory.history as value, i}
+						{#if i == 0}
+							<li in:fly="{{ y: 200, duration: 2000 }}" out:fade><button on:click={() => gameHistory.changeStateTo(i)}>Go to game start</button></li>
+						{:else}
+							<li in:fly="{{ y: 200, duration: 2000 }}" out:fade><button on:click={() => gameHistory.changeStateTo(i)}>Go to move #{i}</button></li>	
+						{/if}
+					{/each}
+				</ol>
+			</div>
 		</div>
-		<div class="history">
-			<ol>
-				{#each $gameHistory.history as value, i}
-					{#if i == 0}
-						<li in:fly="{{ y: 200, duration: 2000 }}" out:fade><button on:click={() => gameHistory.changeStateTo(i)}>Go to game start</button></li>
-					{:else}
-						<li in:fly="{{ y: 200, duration: 2000 }}" out:fade><button on:click={() => gameHistory.changeStateTo(i)}>Go to move #{i}</button></li>	
-					{/if}
-				{/each}
-			</ol>
-		</div>
-	</div>
+	{/if}
 </main>
 
 <style>

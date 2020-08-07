@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login
 from django.contrib.auth import logout
 
+
 from django.utils.dateparse import parse_datetime
 from .models import Game
 
@@ -41,7 +42,15 @@ def GameHistory(request):
         user = User.objects.get(username=request.session.username)
         gamelogs = user.games.all()
         return JsonResponse({
-            'game_logs':  [{'result': gamelog.result_text} for gamelog in gamelogs],
+            'game_logs': [
+                {
+                    'start': str(gamelog.start_date),
+                    'end': str(gamelog.end_date),
+                    'game_turns': gamelog.game_turns,
+                    'result': gamelog.result_text
+                } 
+                for gamelog in gamelogs
+            ],
             'was_successful': True,
             'message': "Saved Game Logs For Current User"
         }) 

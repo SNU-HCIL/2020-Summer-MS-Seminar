@@ -4,8 +4,8 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('log-in/', views.logIn, name='log-in'),
-    path('log-out/', views.logOut, name='log-out'),
+    path('log_in/', views.logIn, name='log-in'),
+    path('log_out/', views.logOut, name='log-out'),
     path('save/', views.SaveGameResult, name='save'),
-    path('ai-action/', views.RetrieveAIAction, name='ai-action')
+    path('ai_action/', views.RetrieveAIAction, name='ai-action')
 ]
